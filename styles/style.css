@@ -1,5 +1,12 @@
-body {
+html, body {
+    height: 100%;
     margin: 5px;
+}
+
+.wrapper {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 header {
@@ -63,4 +70,50 @@ header .header-nav {
 header .header-nav img {
     width: 20%;
     height: 20%;
+}
+
+main {
+    flex: 1 1 auto;
+}
+
+footer {
+    text-align: center;
+}
+
+footer .footer-container {
+    background: yellow;
+    border: solid;
+    padding: 5px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+footer .footer-image {
+    flex-basis: 30%;
+}
+
+footer .footer-information {
+    flex-basis: 20%;
+}
+
+footer .footer-container h3 {
+    font-size: 130%;
+}
+
+footer .footer-sitemap li{
+    font-size: 110%;
+}
+
+
+footer .footer-sitemap a:visited{
+    color: black;
+}
+
+footer .footer-sitemap a:visited{
+    color: red;
+}
+
+footer .footer-social-networks {
+    flex-basis: 30%;
 }
