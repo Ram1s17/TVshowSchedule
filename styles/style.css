@@ -1,0 +1,66 @@
+body {
+    margin: 5px;
+}
+
+header {
+    text-align: center;
+}
+
+header .header-container {
+    background: yellow;
+    border: solid;
+    padding: 5px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+header .header-left {
+    flex-basis: 20%;
+}
+
+header .header-logo img {
+    width: 25%;
+    height: 25%;
+}
+
+header .header-banner h1 {
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-size: 150%;
+}
+header .header-middle {
+    padding: 10px;
+    flex-basis: 40%;
+}
+
+header .header-middle .input-box {
+    display: inline-block;
+    margin-left: 10px;
+}
+
+header input[type="text"] {
+    padding: 5px;
+    font-size: 120%;
+    border-color: black;
+    border-radius: 15px;
+}
+
+header .header-middle .input-button {
+    display: inline-block;
+}
+
+header button {
+    padding: 5px;
+    font-size: 120%;
+    border-color: black;
+    border-radius: 10px;
+}
+
+header .header-nav {
+    flex-basis: 25%;
+}
+
+header .header-nav img {
+    width: 20%;
+    height: 20%;
+}
