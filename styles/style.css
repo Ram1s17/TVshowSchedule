@@ -14,7 +14,7 @@ header {
 }
 
 header .header-container {
-    background: yellow;
+    background: #FC8B2A;
     border: solid;
     padding: 5px;
     display: flex;
@@ -73,11 +73,9 @@ header .header-nav img {
 }
 
 main {
-    flex: 1 1 auto;
-}
-
-main .main-container {
     margin-top: 5px;
+    margin-bottom: 5px;
+    flex: 1 1 auto;
 }
 
 main .main-content {
@@ -85,7 +83,7 @@ main .main-content {
 }
 
 main .main-filters {
-    background:chartreuse;
+    background: #BC7D85;
     border: solid;
     display: flex;
     justify-content: space-between;
@@ -99,7 +97,104 @@ main .main-filters-image {
 #channel-select, #tv-show-select {
     font-size: 105%;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    
+}
+
+main .main-tabs {
+    margin-top: 5px;
+}
+main .main-tabs-items {
+    display: flex;
+    padding: 5px 2px 0px 2px;
+}
+
+main .main-tabs-items a {
+    flex: 0 1 7.143%;
+    border: double;
+    border-radius: 2px;
+    text-decoration: none;
+    font-size: 110%;
+    color:black
+}
+
+main .main-tabs-items a.today {
+    background-color: #01D8DD;
+}
+
+main .main-tabs-items a.active {
+    background-color: #008AA4;
+}
+
+main .main-tabs-body {
+    background: #008AA4;
+    border-style: none solid solid solid;
+    border-radius: 5px;
+}
+
+main .main-tabs-cells {
+    padding: 5px;
+}
+
+main .main-tabs-cell {
+    display: inline-block;
+    border: solid;
+    border-radius: 8px 8px 8px 8px;
+    vertical-align: top;
+    background: #01D8DD;
+    width: 420px;
+    height: 350px;
+    margin: 2px 30px 30px 2px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+main .main-channel-box, .main-event-box-element {
+    display: inline-block;
+    width: 420px;
+}
+
+main .main-channel-box {
+    border-style: none none solid none;
+    padding: 5px;
+}
+
+main .main-channel-logo {
+    display: inline;
+    margin-right: 25px;
+}
+
+main .main-channel-name {
+    display: inline;
+    vertical-align: super;
+}
+
+main .main-channel-name a {
+    text-decoration: none;
+    font-size: 130%;
+    color:black
+}
+
+main .main-event-box-element {
+    text-align: left;
+    border-style: none none dotted none;
+    padding: 5px;
+}
+
+main .main-event-time, .main-event-name {
+    display: inline;
+    padding-left: 10px;
+    vertical-align: middle;
+}
+
+main .main-event-time time {
+    font-size: 110%;
+    color: black;
+    font-style: oblique;
+}
+
+main .main-event-name a {
+    text-decoration: none;
+    font-size: 110%;
+    color:black
 }
 
 footer {
@@ -107,7 +202,7 @@ footer {
 }
 
 footer .footer-container {
-    background: yellow;
+    background: #FC8B2A;
     border: solid;
     padding: 5px;
     display: flex;
