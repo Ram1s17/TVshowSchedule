@@ -76,6 +76,32 @@ main {
     flex: 1 1 auto;
 }
 
+main .main-container {
+    margin-top: 5px;
+}
+
+main .main-content {
+    text-align: center;
+}
+
+main .main-filters {
+    background:chartreuse;
+    border: solid;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+main .main-filters-image {
+    flex-basis: 15%;
+}
+
+#channel-select, #tv-show-select {
+    font-size: 105%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    
+}
+
 footer {
     text-align: center;
 }
