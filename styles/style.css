@@ -162,6 +162,11 @@ main .main-channel-logo {
     margin-right: 25px;
 }
 
+main .main-channel-logo img{
+    width: 10%;
+    height: 10%;
+}
+
 main .main-channel-name {
     display: inline;
     vertical-align: super;
