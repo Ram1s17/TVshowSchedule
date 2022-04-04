@@ -180,7 +180,7 @@ main .main-event-box-element {
 }
 
 main .main-event-time, .main-event-name {
-    display: inline;
+    display: table-cell;
     padding-left: 10px;
     vertical-align: middle;
 }
