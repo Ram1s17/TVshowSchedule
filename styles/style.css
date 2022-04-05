@@ -116,11 +116,11 @@ main .main-tabs-items a {
     color:black
 }
 
-main .main-tabs-items a.today {
+main .main-tabs-items .today {
     background-color: #01D8DD;
 }
 
-main .main-tabs-items a.active {
+main .main-tabs-items .active {
     background-color: #008AA4;
 }
 
