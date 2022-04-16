@@ -12,7 +12,7 @@
         $main_channel_box = $("<div>").addClass("main-channel-box");
         //добавление логотипа канала
         $main_channel_logo = $("<div>").addClass("main-channel-logo");
-        $main_channel_logo.append($("<img>").attr("src", "../images/tv-logo.png"));
+        $main_channel_logo.append($("<img>").attr("src", "img/tv-logo.png"));
         $main_channel_box.append($main_channel_logo);
         //добавление названия канала
         $main_channel_name =  $("<div>").addClass("main-channel-name");
@@ -84,7 +84,7 @@
 };
 
 $(document).ready(function () { 
-	$.getJSON("../scripts/data.json", function (tabObjects) { 
+	$.getJSON("javascripts/data.json", function (tabObjects) { 
 		main(tabObjects); 
 	}); 
 });
