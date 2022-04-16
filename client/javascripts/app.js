@@ -84,7 +84,7 @@
 };
 
 $(document).ready(function () { 
-	$.getJSON("javascripts/data.json", function (tabObjects) { 
+	$.getJSON("/data.json", function (tabObjects) { 
 		main(tabObjects); 
 	}); 
 });
