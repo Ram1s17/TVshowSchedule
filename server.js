@@ -2,7 +2,8 @@ var express = require("express"),
     http = require("http"),
     app = express(),
     mongoose = require("mongoose"),
-    ScheduleController = require("./controllers/schedule_controller.js");
+    ScheduleController = require("./controllers/schedule_controller.js"),
+    TVShowController = require("./controllers/tv_shows_controller.js");
 
 app.use(express.static(__dirname + "/client"));
 
@@ -21,3 +22,4 @@ mongoose.connect('mongodb://localhost/tv_show_schedule',{
 http.createServer(app).listen(3000);
 
 app.get("/data.json", ScheduleController.index);
+app.get("/tv_show/:id", TVShowController.show); 
