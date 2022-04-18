@@ -2,6 +2,7 @@
 var currentDate = new Date;
 //словать вида: "День недели, число": "ГГГГ-ММ-ДД" 
 var datesDictionary = new Map();
+var currentTabText, tabContent;
 
 //функция получения даты в формате "ГГГГ-MM-ДД"
 var dateToString = function(date) {
@@ -41,11 +42,11 @@ var creationOfTabs = function() {
 }
 
 //функция формирования содержания вкладки
-var getTVprogramByDate = function(tabObjects, textOfTab) {
+var getTVprogramByDate = function() {
     //поиск нужного документа на заданную дату
     var currentSchedule = null;
-    tabObjects.forEach(function(tabObject){
-        if ((tabObject._id).split("T")[0] == datesDictionary.get(textOfTab)) {
+    tabContent.forEach(function(tabObject){
+        if ((tabObject._id).split("T")[0] == datesDictionary.get(currentTabText)) {
             currentSchedule = tabObject;
         }
     });
@@ -97,6 +98,48 @@ var getTVprogramByDate = function(tabObjects, textOfTab) {
     }
 };
 
+//функция отображения на странице каналов, соответствующих тематике, выбранной в селекторе
+var selectChannelByTopic = function(channels) {
+    $(".main-tabs-cells").empty();
+    getTVprogramByDate();
+    $(".main-channel-name a").toArray().forEach(function(elem){
+        channels.forEach(function(channel){
+            if (channel._id != $(elem).text()){
+                $(elem).parent().parent().parent().remove();
+            }
+        });
+    });
+    if ($(".main-tabs-cell").toArray().length == 0) {
+        $(".main-tabs-cells").empty();
+        $(".main-tabs-cells").append($("<h2>").append(($("<i>").text("Каналы с данной тематикой не найдены!"))));
+        $(".main-tabs-cells").append($("<img>").attr("src", "img/no-results.png").css({'width': '15%', 'height': '15%'}));
+    }
+};
+
+//функция получения каналов из БД согласно выбранной тематике
+var getChannelsByTopic = function () {
+    var $channel_selected_option;
+    $("#channel-select").change(function(){
+        $channel_selected_option = $("#channel-select option:selected");
+        if ($channel_selected_option.text() == "Все каналы") {
+            $(".main-tabs-cells").empty();
+            getTVprogramByDate();
+        }
+        else {
+            $.get("/channels/" + $channel_selected_option.text(), function(channels) {
+                if (channels.length > 0) {
+                    selectChannelByTopic(channels);
+                }
+                else {
+                    $(".main-tabs-cells").empty();
+                    $(".main-tabs-cells").append($("<h2>").append(($("<i>").text("Каналы с данной тематикой не найдены!"))));
+                    $(".main-tabs-cells").append($("<img>").attr("src", "img/no-results.png").css({'width': '15%', 'height': '15%'}));
+                }
+            });
+        }
+    });
+};
+
 //функция выделения на странице тепередач, соответствующих жанру, выбранному в селекторе
 var selectTVShowbyGenre = function(tv_shows) {
     $(".main-event-name a").toArray().forEach(function(elem){
@@ -112,18 +155,22 @@ var selectTVShowbyGenre = function(tv_shows) {
  var getTVShowsByGenre = function() {
     var $tv_show_selected_option;
     $("#tv-show-select").change(function(){
-        $(".main-event-box-element").css({'background':'#01D8DD'})
+        $(".main-event-box-element").css({'background':'#01D8DD'});
         $tv_show_selected_option = $("#tv-show-select option:selected");
         $.get("/tv_shows/" + $tv_show_selected_option.text(), function(tv_shows) {
-            selectTVShowbyGenre(tv_shows);
+            if (tv_shows.length > 0) {
+                selectTVShowbyGenre(tv_shows);
+            }
         });
     });
  };
  
- var main = function (tabObjects) { 
+ var main = function () { 
     "use strict";
     $("#tv-show-select").attr("selected", null);
     $("#tv-show-select option:nth-child(1)").attr("selected", "selected");
+    $("#channel-select").attr("selected", null);
+    $("#channel-select option:nth-child(1)").attr("selected", "selected");
     $(".main-tabs-items a span").toArray().forEach(function (element) {
 	    $(element).on("click", function () {
 	        var $element = $(element);
@@ -132,8 +179,10 @@ var selectTVShowbyGenre = function(tv_shows) {
             $(element).parent().addClass("active"); 
 	        $(element).addClass("active");
 	        $("main .main-tabs-cells").empty();
-            getTVprogramByDate(tabObjects, $element.text());
+            currentTabText = $element.text();
+            getTVprogramByDate(tabContent, currentTabText);
             getTVShowsByGenre();
+            getChannelsByTopic();
             return false;
 	    });
     })
@@ -143,7 +192,8 @@ var selectTVShowbyGenre = function(tv_shows) {
 
 $(document).ready(function () { 
 	$.getJSON("/data.json", function (tabObjects) { 
+        tabContent = tabObjects;
         creationOfTabs();
-		main(tabObjects); 
+		main(tabContent); 
 	}); 
 });
