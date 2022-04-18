@@ -3,23 +3,33 @@ var currentDate = new Date;
 //словать вида: "День недели, число": "ГГГГ-ММ-ДД" 
 var datesDictionary = new Map();
 
+//функция получения даты в формате "ГГГГ-MM-ДД"
+var dateToString = function(date) {
+    var mm = date.getMonth() + 1;
+    var dd = date.getDate();
+    return [date.getFullYear(),
+        (mm>9 ? '' : '0') + mm,
+        (dd>9 ? '' : '0') + dd
+       ].join('-');
+};
+
 //функция формирования вкладок
 var creationOfTabs = function() {
     var daysOfWeek = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
     //добавление вчерашней даты в словарь
     var yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    var textYesterdayDate = yesterday.toISOString().split('T')[0];
+    var textYesterdayDate = dateToString(yesterday);
     datesDictionary.set(daysOfWeek[yesterday.getDay()] + ", " + yesterday.getDate(), textYesterdayDate);
     //добавление сегодняшней даты в словарь
-    var textCurrentDate = currentDate.toISOString().split('T')[0];
+    var textCurrentDate = dateToString(currentDate);
     datesDictionary.set(daysOfWeek[currentDate.getDay()] + ", " + currentDate.getDate(), textCurrentDate);
     //добавление дат на следующую неделю в словарь
     var date = new Date();
     var textDate;
     for (var i = 0; i < 7; i ++) {
         date.setDate(date.getDate() + 1);
-        textDate = date.toISOString().split('T')[0];
+        textDate = dateToString(date);
         datesDictionary.set(daysOfWeek[date.getDay()] + ", " + date.getDate(), textDate);
     }
     //map iterator с ключами словаря
@@ -43,7 +53,6 @@ var getTVprogramByDate = function(tabObjects, textOfTab) {
     var $main_tabs_cell, $main_channel_box, $main_event_box_element;
     var $main_channel_logo, $main_channel_name;
     var $main_event_time, $main_event_name;
-    var genre;
     //в случае удачного поиска
     if (currentSchedule != null) {
         //цикл по телепрограмме на определенную дату
@@ -74,10 +83,6 @@ var getTVprogramByDate = function(tabObjects, textOfTab) {
                 $main_event_name =  $("<div>").addClass("main-event-name");
                 $main_event_name.append(($("<a>").attr("href", "#")).text(channel_event_object.event_name));
                 $main_event_box_element.append($main_event_name);
-                //добавление атрибута "жанр"
-                $.get("/tv_show/" + channel_event_object.event_name, function(tv_show) {
-                    $main_event_box_element.attr("genre", tv_show.tv_show_genre);
-                });
                 //добавление блока с временем и названием передачи в основной блок канала
                 $main_tabs_cell.append($main_event_box_element);
             });
@@ -92,15 +97,25 @@ var getTVprogramByDate = function(tabObjects, textOfTab) {
     }
 };
 
- var getShowByGenre = function() {
+//функция выделения на странице тепередач, соответствующих жанру, выбранному в селекторе
+var selectTVShowbyGenre = function(tv_shows) {
+    $(".main-event-name a").toArray().forEach(function(elem){
+        tv_shows.forEach(function(tv_show){
+            if (tv_show._id == $(elem).text()){
+                $(elem).parent().parent().css({'background': 'red'});
+            }
+         });
+    });
+};
+
+//функция получения телепередач из БД согласно выбранному жанру
+ var getTVShowsByGenre = function() {
     var $tv_show_selected_option;
     $("#tv-show-select").change(function(){
         $(".main-event-box-element").css({'background':'#01D8DD'})
         $tv_show_selected_option = $("#tv-show-select option:selected");
-        $(".main-event-box-element").toArray().forEach(function(elem){
-            if($(elem).attr("genre") == $tv_show_selected_option.text()){
-                $(elem).css({'background': 'red'});
-            }
+        $.get("/tv_shows/" + $tv_show_selected_option.text(), function(tv_shows) {
+            selectTVShowbyGenre(tv_shows);
         });
     });
  };
@@ -118,7 +133,7 @@ var getTVprogramByDate = function(tabObjects, textOfTab) {
 	        $(element).addClass("active");
 	        $("main .main-tabs-cells").empty();
             getTVprogramByDate(tabObjects, $element.text());
-            getShowByGenre();
+            getTVShowsByGenre();
             return false;
 	    });
     })
