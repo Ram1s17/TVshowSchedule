@@ -1,4 +1,5 @@
 html, body {
+    width: 100%;
     height: 100%;
     margin: 5px;
 }
@@ -142,6 +143,10 @@ main .main-tabs-cell {
     overflow-x: hidden;
     overflow-y: auto;
 }
+
+main .main-tabs-cell::-webkit-scrollbar {
+    display: none;
+} 
 
 main .main-channel-box, .main-event-box-element {
     display: inline-block;

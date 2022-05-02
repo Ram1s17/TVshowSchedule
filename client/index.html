@@ -5,6 +5,7 @@
     <title>Расписание телепередач</title>
     <!--<link rel="stylesheet"  type="text/css"  href="stylesheets/reset.css">-->
     <link rel="stylesheet"  type="text/css"  href="stylesheets/style.css">
+    <link rel="stylesheet"  type="text/css"  href="stylesheets/popup.css">
     <link rel="shortcut icon" href="img/tv.png" type="image/png">
   </head>
   <body>
@@ -21,10 +22,10 @@
                 </div>
                 <form class="header-middle">
                     <div class="input-box">
-                        <input type="text" placeholder="Каналы и передачи" value="">
+                        <input class="input-field" type="text" placeholder="Каналы и передачи" value="">
                     </div>
                     <div class="input-button">
-                        <button type="submit">Найти</button>
+                        <button class="open-popup">Найти</button>
                     </div>
                 </form>
                 <div class="header-clock">
@@ -89,6 +90,13 @@
                     </div>
                 </div>
             </div>
+            <div class="popup-bg">
+                <div class="popup">
+                  <img class="close-popup" src="img/close.png" alt="">
+                  <img class="popup-image" src="img/tv-watching.png" alt="">
+                  <div class="popup-header"></div>
+                </div>
+              </div>
         </main>
         <footer>
             <div class="footer-container">

@@ -17,4 +17,20 @@ TVShowController.show = function (req, res) {
 	});
 };
 
+TVShowController.search = function (req, res) {
+	var id = req.params.id;
+	TVShowModel.find({"_id":id}, function (err, tv_show) {
+		if (err !== null) { 
+			console.log("ERROR" + err);
+			res.status(500).json(err);
+		} else {
+			if (tv_show.length > 0) {
+				res.status(200).json(tv_show);
+			} else {
+				res.json(tv_show);
+			}
+		}
+	});
+};
+
 module.exports = TVShowController;

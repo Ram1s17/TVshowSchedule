@@ -164,7 +164,77 @@ var selectTVShowbyGenre = function(tv_shows) {
         });
     });
  };
- 
+
+ //функция создания всплывающего окна при поиске
+var getPopupContent = function(value) {
+    var today;
+    $.get("/channel/" + value.toUpperCase(), function(channel) {
+        if (channel.length > 0) {
+            $(".popup-content").append(($("<div class = 'popup-info-text'>").append($("<h2>").text("Название телеканала"))));
+            $(".popup-content").append(($("<div class = 'popup-center-info'>").append($("<h3>").text(channel[0]._id))));
+            $(".popup-content").append(($("<div class = 'popup-info-text'>").append($("<h2>").text("Тематика"))));
+            $(".popup-content").append(($("<div class = 'popup-center-info'>").append($("<h3>").text(channel[0].channel_topics))));
+            $(".popup-content").append(($("<div class = 'popup-info-text'>").append($("<h2>").text("Описание"))));            
+            $(".popup-content").append(($("<div class = 'popup-left-info'>").append($("<h3>").text(channel[0].channel_description))));
+            $(".popup-content").append(($("<div class = 'popup-info-text'>").append($("<h2>").text("Расписание на сегодняшний день"))));
+            today = dateToString(currentDate);
+            $.get("/schedule/" + today, function(today_schedule) {
+                if (today_schedule.length > 0) {
+                    today_schedule[0].schedule.forEach(function(channel_object) {
+                        if (channel_object.channel==channel[0]._id) {
+                            $(".popup-content").append(($("<div class = 'popup-left-info'>").append($("<ul>"))));
+                            channel_object.events.forEach(function(event_object) {
+                                $(".popup-left-info ul").append(($("<h3>").append($("<li>").text(event_object.event_time.slice(11,16) + " — " + event_object.event_name))));
+                            });
+                        }
+                    });
+                }
+                else {
+                    $(".popup-content").append(($("<div class = 'popup-center-info'>").append($("<h3>").text("Для данного телеканала расписание на сегодня отстутствует"))));
+                }
+            });
+        }
+        else {
+            $.get("/tv_show/" + value, function(tv_show) {
+                if (tv_show.length > 0) {
+                    $(".popup-content").append(($("<div class = 'popup-info-text'>").append($("<h2>").text("Название телепередачи"))));
+                    $(".popup-content").append(($("<div class = 'popup-center-info'>").append($("<h3>").text(tv_show[0]._id))));
+                    $(".popup-content").append(($("<div class = 'popup-info-text'>").append($("<h2>").text("Жанр"))));
+                    $(".popup-content").append(($("<div class = 'popup-center-info'>").append($("<h3>").text(tv_show[0].tv_show_genre))));
+                    $(".popup-content").append(($("<div class = 'popup-info-text'>").append($("<h2>").text("Описание"))));            
+                    $(".popup-content").append(($("<div class = 'popup-left-info'>").append($("<h3>").text(tv_show[0].tv_show_description))));
+                    $(".popup-content").append(($("<div class = 'popup-info-text'>").append($("<h2>").text("Возрастное ограничение"))));
+                    $(".popup-content").append(($("<div class = 'popup-center-info'>").append($("<h3>").text(tv_show[0].tv_show_age))));
+                    $(".popup-content").append(($("<div class = 'popup-info-text'>").append($("<h2>").text("В сегодняшней телепрограмме"))));
+                    today = dateToString(currentDate);
+                    $.get("/schedule/" + today, function(today_schedule) {
+                        var isFind = false;
+                        if (today_schedule.length > 0) {
+                            today_schedule[0].schedule.forEach(function(channel_object) {
+                                    channel_object.events.forEach(function(event_object) {
+                                         if (event_object.event_name == tv_show[0]._id) {
+                                            $(".popup-content").append(($("<div class = 'popup-left-info'>").append($("<h3>").text(event_object.event_time.slice(11,16) + " — " + event_object.event_name +  " (на телеканале «" + channel_object.channel + "»)"))));
+                                            isFind = true;
+                                        }
+                                    });
+                            });
+                        }
+                        else if (today_schedule.length == 0 || !isFind) {
+                            $(".popup-content").append(($("<div class = 'popup-center-info'>").append($("<h3>").text("Данная телепередача сегодня не транслируется"))));
+                        }
+                    });
+                }
+                else {
+                    $(".popup-content").remove();
+                    $(".popup").append($("<div class='popup-no-content'>"));
+                    $(".popup-no-content").append($("<div class = 'popup-not-found-image'>").append($("<img src='img/not-found.png'>")));
+                    $(".popup-no-content").append(($("<div>").append($("<h2>").text("По запросу " + value + " ничего не найдено!"))));
+                }
+            });
+        }
+    });
+}
+
  var main = function () { 
     "use strict";
     $("#tv-show-select").attr("selected", null);
@@ -185,12 +255,33 @@ var selectTVShowbyGenre = function(tv_shows) {
             getChannelsByTopic();
             return false;
 	    });
-    })
+    });
+    $('.open-popup').click(function(e) {
+        e.preventDefault();
+        $('.popup-bg').fadeIn(800);
+        $('html').addClass('no-scroll');
+        if ($(".input-field").val() == "") {
+            $(".popup").append($("<div class='popup-no-content'>"));
+            $(".popup-no-content").append($("<div class = 'popup-not-found-image'>").append($("<img src='img/not-found.png'>")));
+            $(".popup-no-content").append(($("<div>").append($("<h2>").text("В поле поиска ничего не было введено!"))));
+        }
+        else {
+            $(".popup").append($("<div class='popup-content'>"));
+            getPopupContent($(".input-field").val());
+        }
+    });
+    $('.close-popup').click(function() {
+        $('.popup-bg').fadeOut(800);
+        $('html').removeClass('no-scroll');
+        $(".popup-content").remove();
+        $(".popup-no-content").remove();
+        $(".input-field").val("");
+    });
     $(".main-tabs-items a span.today").trigger("click");
     
 };
 
-$(document).ready(function () { 
+$(document).ready(function () {
 	$.getJSON("/data.json", function (tabObjects) { 
         tabContent = tabObjects;
         creationOfTabs();

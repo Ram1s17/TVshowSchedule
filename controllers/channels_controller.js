@@ -17,4 +17,20 @@ ChannelController.show = function (req, res) {
     });
 };
 
+ChannelController.search = function (req, res) {
+    var id = req.params.id;
+    ChannelModel.find({"_id":id}, function (err, channel) {
+        if (err !== null) { 
+            console.log("ERROR" + err);
+            res.status(500).json(err);
+        } else {
+            if (channel.length > 0) {
+                res.status(200).json(channel);
+            } else {
+                res.json(channel);
+            }
+        }
+    });
+};
+
 module.exports = ChannelController;
