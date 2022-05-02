@@ -1,7 +1,7 @@
 var mongoose = require("mongoose");
 
 var tvShowSchema = mongoose.Schema({
-    _id: String,
+    tv_show_name: String,
     tv_show_genre: String,
     tv_show_description: String,
     tv_show_age: String

@@ -46,7 +46,7 @@ var getTVprogramByDate = function() {
     //поиск нужного документа на заданную дату
     var currentSchedule = null;
     tabContent.forEach(function(tabObject){
-        if ((tabObject._id).split("T")[0] == datesDictionary.get(currentTabText)) {
+        if ((tabObject.date).split("T")[0] == datesDictionary.get(currentTabText)) {
             currentSchedule = tabObject;
         }
     });
@@ -104,7 +104,7 @@ var selectChannelByTopic = function(channels) {
     getTVprogramByDate();
     $(".main-channel-name a").toArray().forEach(function(elem){
         channels.forEach(function(channel){
-            if (channel._id != $(elem).text()){
+            if (channel.channel_name != $(elem).text()){
                 $(elem).parent().parent().parent().remove();
             }
         });
@@ -144,7 +144,7 @@ var getChannelsByTopic = function () {
 var selectTVShowbyGenre = function(tv_shows) {
     $(".main-event-name a").toArray().forEach(function(elem){
         tv_shows.forEach(function(tv_show){
-            if (tv_show._id == $(elem).text()){
+            if (tv_show.tv_show_name == $(elem).text()){
                 $(elem).parent().parent().css({'background': 'red'});
             }
          });
@@ -171,7 +171,7 @@ var getPopupContent = function(value) {
     $.get("/channel/" + value.toUpperCase(), function(channel) {
         if (channel.length > 0) {
             $(".popup-content").append(($("<div class = 'popup-info-text'>").append($("<h2>").text("Название телеканала"))));
-            $(".popup-content").append(($("<div class = 'popup-center-info'>").append($("<h3>").text(channel[0]._id))));
+            $(".popup-content").append(($("<div class = 'popup-center-info'>").append($("<h3>").text(channel[0].channel_name))));
             $(".popup-content").append(($("<div class = 'popup-info-text'>").append($("<h2>").text("Тематика"))));
             $(".popup-content").append(($("<div class = 'popup-center-info'>").append($("<h3>").text(channel[0].channel_topics))));
             $(".popup-content").append(($("<div class = 'popup-info-text'>").append($("<h2>").text("Описание"))));            
@@ -181,7 +181,7 @@ var getPopupContent = function(value) {
             $.get("/schedule/" + today, function(today_schedule) {
                 if (today_schedule.length > 0) {
                     today_schedule[0].schedule.forEach(function(channel_object) {
-                        if (channel_object.channel==channel[0]._id) {
+                        if (channel_object.channel==channel[0].channel_name) {
                             $(".popup-content").append(($("<div class = 'popup-left-info'>").append($("<ul>"))));
                             channel_object.events.forEach(function(event_object) {
                                 $(".popup-left-info ul").append(($("<h3>").append($("<li>").text(event_object.event_time.slice(11,16) + " — " + event_object.event_name))));
@@ -198,7 +198,7 @@ var getPopupContent = function(value) {
             $.get("/tv_show/" + value, function(tv_show) {
                 if (tv_show.length > 0) {
                     $(".popup-content").append(($("<div class = 'popup-info-text'>").append($("<h2>").text("Название телепередачи"))));
-                    $(".popup-content").append(($("<div class = 'popup-center-info'>").append($("<h3>").text(tv_show[0]._id))));
+                    $(".popup-content").append(($("<div class = 'popup-center-info'>").append($("<h3>").text(tv_show[0].tv_show_name))));
                     $(".popup-content").append(($("<div class = 'popup-info-text'>").append($("<h2>").text("Жанр"))));
                     $(".popup-content").append(($("<div class = 'popup-center-info'>").append($("<h3>").text(tv_show[0].tv_show_genre))));
                     $(".popup-content").append(($("<div class = 'popup-info-text'>").append($("<h2>").text("Описание"))));            
@@ -212,7 +212,7 @@ var getPopupContent = function(value) {
                         if (today_schedule.length > 0) {
                             today_schedule[0].schedule.forEach(function(channel_object) {
                                     channel_object.events.forEach(function(event_object) {
-                                         if (event_object.event_name == tv_show[0]._id) {
+                                         if (event_object.event_name == tv_show[0].tv_show_name) {
                                             $(".popup-content").append(($("<div class = 'popup-left-info'>").append($("<h3>").text(event_object.event_time.slice(11,16) + " — " + event_object.event_name +  " (на телеканале «" + channel_object.channel + "»)"))));
                                             isFind = true;
                                         }

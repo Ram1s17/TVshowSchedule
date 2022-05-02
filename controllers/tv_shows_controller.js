@@ -18,8 +18,8 @@ TVShowController.show = function (req, res) {
 };
 
 TVShowController.search = function (req, res) {
-	var id = req.params.id;
-	TVShowModel.find({"_id":id}, function (err, tv_show) {
+	var tv_show_name = req.params.tv_show_name;
+	TVShowModel.find({"tv_show_name":tv_show_name}, function (err, tv_show) {
 		if (err !== null) { 
 			console.log("ERROR" + err);
 			res.status(500).json(err);
