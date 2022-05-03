@@ -1,4 +1,4 @@
-var ChannelModel = require("../models/channels.js"),
+var ChannelModel = require("../models/channel.js"),
     ChannelController = {};
 
 ChannelController.show = function (req, res) {

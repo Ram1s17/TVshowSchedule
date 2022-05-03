@@ -1,4 +1,4 @@
-var TVShowModel = require("../models/tv_shows.js"),
+var TVShowModel = require("../models/tv_show.js"),
     TVShowController = {};
 
 TVShowController.show = function (req, res) {

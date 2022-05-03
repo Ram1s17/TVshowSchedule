@@ -4,9 +4,11 @@ var express = require("express"),
     mongoose = require("mongoose"),
     ScheduleController = require("./controllers/schedule_controller.js"),
     TVShowController = require("./controllers/tv_shows_controller.js"),
-    ChannelController = require("./controllers/channels_controller.js");
+    ChannelController = require("./controllers/channels_controller.js"),
+    UserController = require("./controllers/users_controller.js");
 
-app.use(express.static(__dirname + "/client"));
+app.use('/', express.static(__dirname + "/client"));
+app.use('/user/:username', express.static(__dirname + "/client"));
 
 app.use(express.urlencoded({ extended: true}));
 
@@ -24,7 +26,11 @@ http.createServer(app).listen(3000);
 
 app.get("/data.json", ScheduleController.index);
 app.get("/schedule/:date", ScheduleController.search);
+
 app.get("/tv_shows/:genre", TVShowController.show); 
 app.get("/tv_show/:tv_show_name", TVShowController.search);
+
 app.get("/channels/:topic", ChannelController.show);
-app.get("/channel/:channel_name", ChannelController.search);  
+app.get("/channel/:channel_name", ChannelController.search);
+
+app.get("/users/:username", UserController.show);
