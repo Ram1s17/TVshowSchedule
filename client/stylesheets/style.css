@@ -181,13 +181,14 @@ main .main-channel-name a {
 
 main .main-event-box-element {
     text-align: left;
-    border-style: none none dotted none;
+    border-style: none none dotted none; 
     padding: 5px;
 }
 
 main .main-event-time, .main-event-name {
     display: table-cell;
     padding-left: 10px;
+    padding-right: 10px;
     vertical-align: middle;
 }
 

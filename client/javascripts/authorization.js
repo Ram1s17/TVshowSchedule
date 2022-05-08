@@ -1,8 +1,8 @@
 var main = function () {
 	"use strict";
-
-    $("#auto-button").on("click", function() {
-		var username = $(".auto-box input[type='text']").val();
+    $("#autho-button").on("click", function(e) {
+		e.preventDefault();
+		var username = $(".autho-box input[type='text']").val();
 		if (username !== null && username.trim() !== "") {
 			$.ajax({
 				'url': '/users/' + username,
@@ -10,17 +10,16 @@ var main = function () {
 			}).done(function(response) {
 				window.location.replace('users/' + username + '/');
 			}).fail(function(jqXHR, textStatus, error) {
-				console.log(error);
-				alert("Ошибка! Cтатус: " + jqXHR.status + " – " + jqXHR.textStatus);	
+				alert("Ошибка авторизации! Пользователь с данным логином отсутствует в системе!");
+				$(".autho-box input[type='text']").val("");	
 			});
 		}
 		else
 			alert("Имя пользователя не задано!");
 	});
-
     $('input').keydown(function(e) {
         if(e.keyCode === 13) {
-            $("#auto-button").click();
+            $("#autho-button").click();
         }
     });
 };

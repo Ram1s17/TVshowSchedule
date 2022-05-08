@@ -3,7 +3,6 @@ var currentDate = new Date;
 //словать вида: "День недели, число": "ГГГГ-ММ-ДД" 
 var datesDictionary = new Map();
 var currentTabText, tabContent;
-var flag = false
 
 //функция получения даты в формате "ГГГГ-MM-ДД"
 var dateToString = function(date) {
@@ -181,6 +180,7 @@ var getPopupContent = function(value) {
             $(".popup-content").append(($("<div class = 'popup-info-text'>").append($("<h2>").text("Расписание на сегодняшний день"))));
             today = dateToString(currentDate);
             $.get("/schedule/" + today, function(today_schedule) {
+                var isFind = false;
                 if (today_schedule.length > 0) {
                     today_schedule[0].schedule.forEach(function(channel_object) {
                         if (channel_object.channel==channel[0].channel_name) {
@@ -188,10 +188,12 @@ var getPopupContent = function(value) {
                             channel_object.events.forEach(function(event_object) {
                                 $(".popup-left-info ul").append(($("<h3>").append($("<li>").text(event_object.event_time.slice(11,16) + " — " + event_object.event_name))));
                             });
+                            isFind = true;
                         }
                     });
                 }
-                else {
+                if (today_schedule.length == 0 || !isFind) {
+                    console.log("Fff");
                     $(".popup-content").append(($("<div class = 'popup-center-info'>").append($("<h3>").text("Для данного телеканала расписание на сегодня отстутствует"))));
                 }
             });
@@ -221,7 +223,7 @@ var getPopupContent = function(value) {
                                 });
                             });
                         }
-                        else if (today_schedule.length == 0 || !isFind) {
+                        if (today_schedule.length == 0 || !isFind) {
                             $(".popup-content").append(($("<div class = 'popup-center-info'>").append($("<h3>").text("Данная телепередача сегодня не транслируется"))));
                         }
                     });
