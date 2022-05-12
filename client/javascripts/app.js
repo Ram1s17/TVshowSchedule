@@ -193,7 +193,6 @@ var getPopupContent = function(value) {
                     });
                 }
                 if (today_schedule.length == 0 || !isFind) {
-                    console.log("Fff");
                     $(".popup-content").append(($("<div class = 'popup-center-info'>").append($("<h3>").text("Для данного телеканала расписание на сегодня отстутствует"))));
                 }
             });
@@ -232,7 +231,7 @@ var getPopupContent = function(value) {
                     $(".popup-content").remove();
                     $(".popup").append($("<div class='popup-no-content'>"));
                     $(".popup-no-content").append($("<div class = 'popup-not-found-image'>").append($("<img src='img/not-found.png'>")));
-                    $(".popup-no-content").append(($("<div>").append($("<h2>").text("По запросу " + value + " ничего не найдено!"))));
+                    $(".popup-no-content").append(($("<div>").append($("<h2>").text("По запросу «" + value + "» ничего не найдено!"))));
                 }
             });
         }
@@ -245,15 +244,15 @@ var getPopupContent = function(value) {
     $("#tv-show-select option:nth-child(1)").attr("selected", "selected");
     $("#channel-select").attr("selected", null);
     $("#channel-select option:nth-child(1)").attr("selected", "selected");
-    $(".main-tabs-items a span").toArray().forEach(function (element) {
+    $(".main-tabs-items a").toArray().forEach(function (element) {
 	    $(element).on("click", function () {
 	        var $element = $(element);
 	        $(".main-tabs-items a span").removeClass("active");
             $(".main-tabs-items a").removeClass("active");
-            $(element).parent().addClass("active"); 
+            $(element).children().addClass("active"); 
 	        $(element).addClass("active");
 	        $("main .main-tabs-cells").empty();
-            currentTabText = $element.text();
+            currentTabText = $element.children().text();
             getTVprogramByDate(tabContent, currentTabText);
             $("#channel-select").change();
             return false;
@@ -316,7 +315,7 @@ var getPopupContent = function(value) {
         $(".popup-no-content").remove();
         $(".input-field").val("");
     });
-    $(".main-tabs-items a span.today").trigger("click");
+    $(".main-tabs-items a.today").trigger("click");
 };
 
 $(document).ready(function () {

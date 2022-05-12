@@ -1,5 +1,4 @@
 html, body {
-    width: 100%;
     height: 100%;
     margin: 5px;
 }
@@ -236,10 +235,6 @@ footer .footer-sitemap li{
 
 footer .footer-sitemap a:visited{
     color: black;
-}
-
-footer .footer-sitemap a:visited{
-    color: red;
 }
 
 footer .footer-social-networks {

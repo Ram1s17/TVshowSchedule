@@ -26,8 +26,12 @@ http.createServer(app).listen(3000);
 app.get("/data.json", ScheduleController.index);
 app.get("/schedule/:date", ScheduleController.search);
 
+app.get("/tv_shows.json", TVShowController.index);
 app.get("/tv_shows/:genre", TVShowController.show); 
 app.get("/tv_show/:tv_show_name", TVShowController.search);
+app.post("/tv_shows", TVShowController.create);
+app.put("/tv_show/:tv_show_name", TVShowController.update);
+app.delete("/tv_show/:tv_show_name", TVShowController.destroy);
 
 app.get("/channels/:topic", ChannelController.show);
 app.get("/channel/:channel_name", ChannelController.search);

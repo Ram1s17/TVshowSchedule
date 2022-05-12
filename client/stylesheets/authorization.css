@@ -1,3 +1,8 @@
+html, body {
+    height: 100%;
+    margin: 5px;
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -17,8 +22,8 @@ img {
     height: 235px;
     padding: 15px;
     position: absolute;
-    top: 55.4%;
-    left: 47.3%;
+    top: 55.8%;
+    left: 47.1%;
     transform: translate(-50%, -50%);
     background: #191919;
     text-align: center;
