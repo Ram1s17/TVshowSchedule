@@ -107,6 +107,184 @@ var creationOfTabs = function() {
     });
 }
 
+//функция обновления данных телеканала
+var updateChannel = function(values_array, input_array) {
+    var i = 0, isChanged = false, isInvalidInput = false;
+    input_array.forEach(function(value){
+        if (!(value !== null && value.trim() !== "")) {
+            isInvalidInput = true;
+        }
+        if (values_array[i] != value){
+            isChanged = true;
+        }
+        i++;
+    });
+    if (isInvalidInput) {
+        alert("Присутствуют незаполненные поля! Попробуйте еще раз!");
+    }
+    if (!isInvalidInput) {
+        if (!isChanged) {
+            alert("Данные телеканала не были изменены!");
+        }
+        else {
+            $.ajax({
+                'url': '/channel/' + values_array[0],
+                'type': 'PUT',
+                'data': {
+                    'channel_name': input_array[0],
+                    'channel_topics': input_array[1],
+                    'channel_description': input_array[2]
+                }
+            }).done(function(responde) {
+                alert('Данные телеканала успешно изменены!');
+            }).fail(function(jqXHR, textStatus, error) {
+                alert("Ошибка! Статус: " + jqXHR.status + " – " + jqXHR.textStatus);	
+            });
+            location.reload();
+        }
+    }
+};
+
+//функция формирования вкладки для управления телеканалами
+var createChannelsTab = function() {
+    $(".main-tabs-body").append($("<div class='main-channels-panel'><h2>ПАНЕЛЬ УПРАВЛЕНИЯ</h2>"+
+                                "<form class='channel-form'> <input id='input-channel-field' type='text' placeholder='Название телеканала' title='Название телеканала'value=''>" +
+                                "<button class='search-channel-button'>Найти</button>" +
+                                "<button class='delete-channel-button'>Удалить</button>" +
+                                "<button class='cancel-button'>Отмена</button></form></div>"));
+    $(".cancel-button").on("click", function(e) {
+        e.preventDefault();
+        $("#input-channel-field").attr('disabled', false);
+        $(".search-channel-button").attr('disabled', false);
+        $(".delete-channel-button").attr('disabled', false);
+        $(".panel-block").remove();
+    });
+    $(".search-channel-button").on("click", function(e) {
+        e.preventDefault();
+        $(".panel-block").remove();
+        var channel_name = $("#input-channel-field").val();
+        if (channel_name !== null && channel_name.trim() !== "") {
+            $.get("/channel/" + channel_name.trim().toUpperCase(), function(channel) {
+                $(".main-channels-panel").append($("<div class='panel-block'>"));
+                $(".panel-block").append($("<input id='channel-topics-input' type='text' placeholder='Тематика' title='Тематика' value=''>"));
+                $(".panel-block").append($("<textarea id='channel-description-textarea' style='resize: none;' placeholder='Описание' rows='15' cols='35' title='Описание'>"));
+                if (channel.length != 0) {
+                    var values_array = [];
+                    $(".search-channel-button").attr('disabled', true);
+                    $(".delete-channel-button").attr('disabled', true);
+                    $("#channel-topics-input").val(channel[0].channel_topics);
+                    $("#channel-description-textarea").text(channel[0].channel_description);
+                    $(".panel-block").append($("<button class='update-channel-button'>Изменить</button>"));
+                    values_array.push(channel_name.trim().toUpperCase());
+                    values_array.push(channel[0].channel_topics);
+                    values_array.push(channel[0].channel_description);
+                    $(".update-channel-button").on("click", function() {
+                        var input_array = [];
+                        input_array.push($("#input-channel-field").val().trim().toUpperCase());
+                        if (values_array[0] == input_array[0]) {
+                            input_array.push($("#channel-topics-input").val().trim());
+                            input_array.push($("#channel-description-textarea").val().trim());
+                            updateChannel(values_array, input_array);
+                        }
+                        else {
+                            $.get("/channel/" + $("#input-channel-field").val().trim().toUpperCase(), function(tv_channel) {
+                                if (tv_channel.length != 0) {
+                                    alert("Телеканал с названием «" + $("#input-channel-field").val().trim().toUpperCase() +"» уже существует!");
+                                }
+                                else {
+                                    input_array.push($("#channel-topics-input").val().trim());
+                                    input_array.push($("#channel-description-textarea").val().trim());
+                                    updateChannel(values_array, input_array);
+                                }
+                            });
+                        }
+                    });
+                }
+                else {
+                    if (confirm("Данный телеканал отсутствует в системе. Хотите добавить?")) { 
+                        $(".search-channel-button").attr('disabled', true);
+                        $(".delete-channel-button").attr('disabled', true);
+                        $("#input-channel-field").attr('disabled', true);
+                        $(".panel-block").append($("<button class='add-channel-button'>Добавить</button>"));
+                        $(".add-channel-button").on("click", function() {
+                            var input_array = [], isInvalidInput;
+                            var channel_topics = $("#channel-topics-input").val().trim();
+                            input_array.push(channel_topics);
+                            var channel_description = $("#channel-description-textarea").val().trim();
+                            input_array.push(channel_description);
+                            input_array.forEach(function(value){
+                                if (!(value !== null && value.trim() !== "")) {
+                                    isInvalidInput = true;
+                                }
+                            });
+                            if (isInvalidInput) {
+                                alert("Присутствуют незаполненные поля! Попробуйте еще раз!");
+                            }
+                            else {
+                                var  newChannel = {
+                                    "channel_name": channel_name.trim().toUpperCase(),
+                                    "channel_topics": channel_topics,
+                                    "channel_description": channel_description
+                                };
+                                $.post("/channels", newChannel, function() {
+                                    $("#input-channel-field").attr('disabled', false);
+                                }).done(function(response) {
+                                    alert('Новый телеканал успешно создан!');
+                                }).fail(function(jqXHR, textStatus, error) {
+                                    alert("Ошибка! Статус: " + jqXHR.status + " – " + jqXHR.textStatus);
+                                });
+                                location.reload();
+                            }
+                        });
+                    }
+                    else 
+                        $(".panel-block").remove();
+                }
+            });
+        }
+        else
+            alert("Название телеканала не задано!");
+    });
+    $(".delete-channel-button").on("click", function(e) {
+        e.preventDefault();
+        $(".panel-block").remove();
+        var channel_name = $("#input-channel-field").val();
+        if (channel_name !== null && channel_name.trim() !== "") {
+            $.get("/channel/" + channel_name.trim(), function(channel) {
+                if(channel.length != 0) {
+                    if (confirm("Вы уверены, что хотите удалить телеканал  «" + channel_name.trim() + "»?")) {
+                        $.ajax({
+                            'url': '/channel/' + channel_name.trim(),
+                            'type': 'DELETE',
+                        }).done(function(responde) {
+                            alert('Телеканал успешно удален!');
+                        }).fail(function(jqXHR, textStatus, error) {
+                            alert("Ошибка! Статус: " + jqXHR.status + " – " + jqXHR.textStatus);	
+                        });
+                        location.reload();
+                    }
+                }
+                else {
+                    alert("Данный телеканал отсутствует в системе!");
+                    $("#input-channel-field").val("");
+                }
+            });
+        }
+        else
+            alert("Название телеканала не задано!");
+    });
+    $(".main-tabs-body").append($("<div class='main-channels-list'>"));
+    $(".main-channels-list").append($("<h2>Список телеканалов</h2>"));
+    $(".main-channels-list").append($("<div class='channels-list'>"));
+    $(".channels-list").append($("<ul>"));
+    $.getJSON("/channels.json", function (channels) {
+        channels.forEach(function(channel){
+            $(".channels-list").append($("<li>").text("«" + channel.channel_name + "»"));
+        });
+	}); 
+};
+
+//функция обновления данных телепередачи
 var updateTVShow = function(values_array, input_array) {
     var i = 0, isChanged = false, isInvalidInput = false;
     input_array.forEach(function(value){
@@ -149,6 +327,7 @@ var updateTVShow = function(values_array, input_array) {
     }
 };
 
+//формирование вкладки управления телепередачами
 var createTVShowsTab = function() {
     $(".main-tabs-body").append($("<div class='main-tv-shows-panel'><h2>ПАНЕЛЬ УПРАВЛЕНИЯ</h2>"+
                                 "<form class='tv-show-form'> <input id='input-show-field' type='text' placeholder='Название телепередачи' title='Название телепередачи'value=''>" +
@@ -167,7 +346,7 @@ var createTVShowsTab = function() {
         $(".panel-block").remove();
         var show_name = $("#input-show-field").val();
         if (show_name !== null && show_name.trim() !== "") {
-            $.get("/tv_show/" + show_name, function(tv_show) {
+            $.get("/tv_show/" + show_name.trim(), function(tv_show) {
                 $(".main-tv-shows-panel").append($("<div class='panel-block'>"));
                 $(".panel-block").append($("<input id='show-genre-input' type='text' placeholder='Жанр' title='Жанр' value=''>"));
                 $(".panel-block").append($("<textarea id='show-description-textarea' style='resize: none;' placeholder='Описание' rows='15' cols='35' title='Описание'>"));
@@ -180,27 +359,27 @@ var createTVShowsTab = function() {
                     $("#show-description-textarea").text(tv_show[0].tv_show_description);
                     $("#show-age-input").val((tv_show[0].tv_show_age.split("+"))[0]);
                     $(".panel-block").append($("<button class='update-tv-show-button'>Изменить</button>"));
-                    values_array.push(show_name);
+                    values_array.push(show_name.trim());
                     values_array.push(tv_show[0].tv_show_genre);
                     values_array.push(tv_show[0].tv_show_description);
                     values_array.push((tv_show[0].tv_show_age.split("+"))[0]);
                     $(".update-tv-show-button").on("click", function() {
                         var input_array = [];
-                        input_array.push($("#input-show-field").val());
+                        input_array.push($("#input-show-field").val().trim());
                         if (values_array[0] == input_array[0]) {
-                            input_array.push($("#show-genre-input").val());
-                            input_array.push($("#show-description-textarea").val());
+                            input_array.push($("#show-genre-input").val().trim());
+                            input_array.push($("#show-description-textarea").val().trim());
                             input_array.push($("#show-age-input").val());
                             updateTVShow(values_array, input_array);
                         }
                         else {
-                            $.get("/tv_show/" + $("#input-show-field").val(), function(show) { 
+                            $.get("/tv_show/" + $("#input-show-field").val().trim(), function(show) { 
                                 if (show.length != 0) {
-                                    alert("Телепередача с названием «" + $("#input-show-field").val() +"» уже существует!");
+                                    alert("Телепередача с названием «" + $("#input-show-field").val().trim() +"» уже существует!");
                                 }
                                 else {
-                                    input_array.push($("#show-genre-input").val());
-                                    input_array.push($("#show-description-textarea").val());
+                                    input_array.push($("#show-genre-input").val().trim());
+                                    input_array.push($("#show-description-textarea").val().trim());
                                     input_array.push($("#show-age-input").val());
                                     updateTVShow(values_array, input_array);
                                 }
@@ -216,9 +395,9 @@ var createTVShowsTab = function() {
                         $(".panel-block").append($("<button class='add-tv-show-button'>Добавить</button>"));
                         $(".add-tv-show-button").on("click", function() {
                             var input_array = [], isInvalidInput;
-                            var show_genre = $("#show-genre-input").val();
+                            var show_genre = $("#show-genre-input").val().trim();
                             input_array.push(show_genre);
-                            var show_description = $("#show-description-textarea").val();
+                            var show_description = $("#show-description-textarea").val().trim();
                             input_array.push(show_description);
                             var show_age = $("#show-age-input").val();
                             input_array.push(show_age);
@@ -236,7 +415,7 @@ var createTVShowsTab = function() {
                             }
                             if (!isInvalidInput) {
                                 var  newTvShow = {
-                                    "tv_show_name": show_name,
+                                    "tv_show_name": show_name.trim(),
                                     "tv_show_genre": show_genre,
                                     "tv_show_description": show_description,
                                     "tv_show_age": show_age + "+"
@@ -265,11 +444,11 @@ var createTVShowsTab = function() {
         $(".panel-block").remove();
         var show_name = $("#input-show-field").val();
         if (show_name !== null && show_name.trim() !== "") {
-            $.get("/tv_show/" + show_name, function(tv_show) {
+            $.get("/tv_show/" + show_name.trim(), function(tv_show) {
                 if(tv_show.length != 0) {
                     if (confirm("Вы уверены, что хотите удалить телепередачу «" + show_name + "»?")) {
                         $.ajax({
-                            'url': '/tv_show/' + show_name,
+                            'url': '/tv_show/' + show_name.trim(),
                             'type': 'DELETE',
                         }).done(function(responde) {
                             alert('Телепередача успешно удалена!');
@@ -294,7 +473,7 @@ var createTVShowsTab = function() {
     $(".tv-shows-list").append($("<ul>"));
     $.getJSON("/tv_shows.json", function (tv_shows) {
         tv_shows.forEach(function(tv_show){
-            $(".tv-shows-list").append($("<li>").text(tv_show.tv_show_name));
+            $(".tv-shows-list").append($("<li>").text("«" + tv_show.tv_show_name + "»"));
         });
 	}); 
 };
@@ -313,7 +492,7 @@ var main = function(){
 	            console.log("1");
 	        } 
 	        else if ($element.children().parent().is(":nth-child(2)")) { 
-		        console.log("2");
+		        createChannelsTab();
 	        } 
 	        else if ($element.children().parent().is(":nth-child(3)")) { 
 		        createTVShowsTab();

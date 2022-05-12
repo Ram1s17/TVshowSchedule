@@ -114,7 +114,7 @@ main .main-tabs-body {
     text-align: center;
 }
 
-.main-tv-shows-panel {
+.main-tv-shows-panel, .main-channels-panel {
     text-align: center;
     padding: 20px 30px 20px 30px;
     background-color: #FC8B2A;
@@ -125,20 +125,20 @@ main .main-tabs-body {
     align-items: center;
 }
 
-#input-show-field {
+#input-show-field, #input-channel-field {
     width: 185px;
     font-size: 95%;
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     margin-right: 10px;
 }
 
-.search-tv-show-button, .delete-tv-show-button, .cancel-button {
+.search-tv-show-button, .delete-tv-show-button, .cancel-button, .search-channel-button, .delete-channel-button {
     font-size: 95%;
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     margin-right: 10px;
 }
 
-#show-genre-input {
+#show-genre-input, #channel-topics-input {
     text-align: center;
     font-size: 95%;
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
@@ -147,7 +147,7 @@ main .main-tabs-body {
     margin-bottom: 10px;
 }
 
-#show-description-textarea {
+#show-description-textarea, #channel-description-textarea {
     font-size: 95%;
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     padding: 5px;
@@ -170,12 +170,12 @@ main .main-tabs-body {
     margin-top: 10px;
 }
 
-.add-tv-show-button, .update-tv-show-button {
+.add-tv-show-button, .update-tv-show-button, .add-channel-button, .update-channel-button {
     font-size: 95%;
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
 
-.main-tv-shows-list {
+.main-tv-shows-list, .main-channels-list {
     text-align: center;
     padding: 20px 15px 20px 20px;
     background-color: #01D8DD;
@@ -185,19 +185,19 @@ main .main-tabs-body {
     width: 300px;
 }
 
-.main-tv-shows-list h2 {
+.main-tv-shows-list h2, .main-channels-list h2{
     margin-top: 5px;
     margin-bottom: 5px;
 }
 
-.tv-shows-list {
+.tv-shows-list, .channels-list {
     text-align: left;
     height: 410px;
     overflow-x: hidden; 
     overflow-y: auto;  
 }
 
-.tv-shows-list li {
+.tv-shows-list li, .channels-list li {
     font-style: normal;
     font-weight: normal;
     font-size: 120%;
@@ -205,7 +205,7 @@ main .main-tabs-body {
     margin-bottom: 15px;
 }
 
-.tv-shows-list::-webkit-scrollbar {
+.tv-shows-list::-webkit-scrollbar, .channels-list::-webkit-scrollbar {
     display: none;
 }
 

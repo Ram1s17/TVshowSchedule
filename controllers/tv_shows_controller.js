@@ -10,7 +10,7 @@ TVShowController.index = function(req, res) {
 			res.status(200).json(tv_shows);
 		}
 	});
-}
+};
 
 
 TVShowController.show = function (req, res) {

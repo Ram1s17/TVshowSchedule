@@ -33,8 +33,12 @@ app.post("/tv_shows", TVShowController.create);
 app.put("/tv_show/:tv_show_name", TVShowController.update);
 app.delete("/tv_show/:tv_show_name", TVShowController.destroy);
 
+app.get("/channels.json", ChannelController.index);
 app.get("/channels/:topic", ChannelController.show);
 app.get("/channel/:channel_name", ChannelController.search);
+app.post("/channels", ChannelController.create);
+app.put("/channel/:channel_name", ChannelController.update);
+app.delete("/channel/:channel_name", ChannelController.destroy);
 
 app.get("/users.json", UserController.index);
 app.get("/user/:username", UserController.search);
