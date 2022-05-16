@@ -1,4 +1,5 @@
 var ChannelModel = require("../models/channel.js"),
+    ScheduleModel = require("../models/schedule.js"),
     ChannelController = {};
 
 ChannelController.index = function(req, res) {
@@ -63,7 +64,16 @@ ChannelController.update = function(req, res) {
         if (err !== null) {
             res.status(500).json(err);
         } else {
-            res.status(200).json(channel);
+            ScheduleModel.updateMany({"schedule": {$elemMatch: {"channel": channel_name}}},
+                                     {$set: {"schedule.$[outer].channel": updatedChannel.channel_name}},
+                                     {"arrayFilters": [{"outer.channel": channel_name}]},  function (err1, channelInSchedule) {
+                if (err1 !== null) {
+                    res.status(500).json(err1);
+                }
+                else {
+                    res.status(200).json(channelInSchedule);
+                }
+            });
         }
     });
 };
@@ -75,7 +85,21 @@ ChannelController.destroy = function(req, res) {
             res.status(500).json(err);
         } 
         else {
-            res.status(200).json(channel);
+            ScheduleModel.updateMany({"schedule": {$elemMatch: {"channel": channel_name}}}, {$pull: {"schedule": {"channel": channel_name}}}, function (err1, schedule_by_date) {
+                if (err1 !== null) {
+                    res.status(500).json(err1);
+                } 
+                else {
+                    ScheduleModel.deleteMany({"schedule": {$eq: []}}, function (err2, schedule) {
+                        if (err2 !== null) {
+                            res.status(500).json(err2);
+                        } 
+                        else {
+                            res.status(200).json(schedule);
+                        }
+                    });
+                }
+            });
         }
     });
 };
