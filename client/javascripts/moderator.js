@@ -2,7 +2,8 @@
 var currentDate = new Date;
 //словать вида: "День недели, число": "ГГГГ-ММ-ДД" 
 var datesDictionary = new Map();
-//var currentTabText, tabContent;
+//словарь вида: "Канал": [["Время": "Событие"]]
+var busyTimesDictionary = new Map();
 
 //функция получения даты в формате "ГГГГ-MM-ДД"
 var dateToString = function(date) {
@@ -17,15 +18,12 @@ var dateToString = function(date) {
 //функция формирования вкладок
 var creationOfTabs = function() {
     var daysOfWeek = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
-    //добавление вчерашней даты в словарь
     var yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     var textYesterdayDate = dateToString(yesterday);
     datesDictionary.set(daysOfWeek[yesterday.getDay()] + ", " + yesterday.getDate(), textYesterdayDate);
-    //добавление сегодняшней даты в словарь
     var textCurrentDate = dateToString(currentDate);
     datesDictionary.set(daysOfWeek[currentDate.getDay()] + ", " + currentDate.getDate(), textCurrentDate);
-    //добавление дат на следующую неделю в словарь
     var date = new Date();
     var textDate;
     for (var i = 0; i < 7; i ++) {
@@ -33,7 +31,68 @@ var creationOfTabs = function() {
         textDate = dateToString(date);
         datesDictionary.set(daysOfWeek[date.getDay()] + ", " + date.getDate(), textDate);
     }
-}
+};
+
+//функция получения расписания на опредленную дату
+var getTVprogramByDate = function(scheduleElement) {
+    busyTimesDictionary.clear();
+    var $main_tabs_cells = $(".schedule-list");
+    var $main_tabs_cell, $main_channel_box, $main_event_box_element;
+    var $main_channel_logo, $main_channel_name;
+    var $main_event_time, $main_event_name;
+    var timeAndEventArray = [];
+    if (scheduleElement.length != 0) {
+        (scheduleElement[0].schedule).forEach(function(channel_object) {
+            //основной блок канала
+            $main_tabs_cell = $("<div>").addClass("main-tabs-cell");
+            //блок с логотипом и названием канала
+            $main_channel_box = $("<div>").addClass("main-channel-box");
+            //добавление логотипа канала
+            $main_channel_logo = $("<div>").addClass("main-channel-logo");
+            $main_channel_logo.append($("<img>").attr("src", "/img/tv-logo.png"));
+            $main_channel_box.append($main_channel_logo);
+            //добавление названия канала
+            $main_channel_name =  $("<div>").addClass("main-channel-name");
+            $main_channel_name.append(($("<a>").attr("href", "#channel")).text(channel_object.channel));
+            $main_channel_box.append($main_channel_name);
+            //добавление блока с логотипом и названием канала в основной блок канала
+            $main_tabs_cell.append($main_channel_box);
+            
+            (channel_object.events).sort(function(a,b){
+                return new Date(a.event_time) - new Date(b.event_time);
+            });
+
+            //цикл по телепрограмме определенного канал
+            (channel_object.events).forEach(function(channel_event_object) {
+                //блок с временем и названием передачи
+                $main_event_box_element = $("<div>").addClass("main-event-box-element");
+                //добавление времени передачи
+                $main_event_time = $("<div>").addClass("main-event-time");
+                $main_event_time.append($("<time>").text(channel_event_object.event_time.slice(11,16)));
+                $main_event_box_element.append($main_event_time);
+                //добавление названия передачи
+                $main_event_name =  $("<div>").addClass("main-event-name");
+                $main_event_name.append(($("<a>").attr("href", "#tv_show")).text(channel_event_object.event_name));
+                $main_event_box_element.append($main_event_name);
+                //добавление блока с временем и названием передачи в основной блок канала
+                $main_tabs_cell.append($main_event_box_element);
+                
+                timeAndEventArray.push([channel_event_object.event_time.slice(11,16), channel_event_object.event_name]);
+            });
+
+            busyTimesDictionary.set(channel_object.channel, timeAndEventArray);
+
+            //добавление основного блока канала в список
+            $main_tabs_cells.append($main_tabs_cell);
+        });
+    }
+    else {
+        var $main_tabs_no_schedule = $("<div class='main-tabs-no-schedule'>");
+        $main_tabs_cells.append($main_tabs_no_schedule);
+        $main_tabs_no_schedule.append($("<img>").attr("src", "/img/warning.png").css({'width': '50%', 'height': '50%'}));
+        $main_tabs_no_schedule.append($("<h2>").append(($("<i>").text("Телепрограмма отсутствует!"))));
+    }
+};
 
 //функция создания всплывающего окна при поиске
  var getPopupContent = function(value) {
@@ -105,7 +164,362 @@ var creationOfTabs = function() {
             });
         }
     });
-}
+};
+
+var addEventToChannel = function(schedule, channelName){
+    $(".cancel-button").attr('disabled', true); 
+    $(".cancel-сhannel-button").attr('disabled', false); 
+    $(".search-channel-button").attr('disabled', true);
+    $(".delete-channel-button").attr('disabled', true);
+    $("#channel-select").attr('disabled', true);
+    $.getJSON("/tv_shows.json", function (tv_shows) {
+        tv_shows.forEach(function(tv_show){
+            $("#event-select").append($("<option value=''>").text(tv_show.tv_show_name));
+        });
+        $("#event-select").attr("selected", null);
+        $("#event-select option:nth-child(1)").attr("selected", "selected");
+        var $event_selected_option, eventName = $("#event-select option:selected").text();
+        $("#event-select").change(function(){
+            $event_selected_option = $("#event-select option:selected");
+            eventName = $event_selected_option.text();
+        });
+        var selected_time = $("#event-time").val();
+        $("#event-time").change(function(){
+            selected_time = $("#event-time").val();
+        });
+        $(".add-event-button").on("click", function() {
+            var input_array = [], isInvalidInput;
+            var event_time = selected_time;
+            input_array.push(event_time);
+            var event_name = eventName;
+            input_array.push(event_name);
+            input_array.forEach(function(value){
+                if (!(value !== null && value.trim() !== "")) {
+                    isInvalidInput = true;
+                }
+            });
+            if (isInvalidInput) {
+                alert("Присутствует незаполненное поле! Попробуйте еще раз!");
+            }
+            if (busyTimesDictionary.has(channelName)) {
+                var events_array = busyTimesDictionary.get(channelName);
+                for (var i = 0; i < events_array.length; i++) {
+                    if (events_array[i].includes(event_time)) {
+                        alert("На " + event_time + " уже есть событие! Попробуйте еще раз!");
+                        isInvalidInput = true;
+                        break;
+                    }
+                }
+            }
+            if (!isInvalidInput) {
+                var newEventForChannel = {
+                    "date": $("#input-date-field").val(),
+                    "channel": channelName,
+                    "event_time": $("#input-date-field").val() + "T" + input_array[0] + ":00Z",
+                    "event_name": input_array[1]
+                };
+                if (schedule == null) {
+                    $.post("/channel_and_event", newEventForChannel, function() {
+                        $("#channel-select").attr('disabled', false);
+                        $(".search-channel-button").attr('disabled', false);
+                        $(".delete-channel-button").attr('disabled', false);
+                        $(".cancel-button").attr('disabled', false);
+                        $(".cancel-сhannel-button").attr('disabled', true);  
+                    }).done(function(response) {
+                        alert('Новое событие для телеканала «'+ channelName +'» успешно добавлено!');
+                        $(".subpanel-block").remove();
+                        $("#input-date-field").change();
+                    }).fail(function(jqXHR, textStatus, error) {
+                        alert("Ошибка! Статус: " + jqXHR.status + " – " + jqXHR.textStatus);
+                    });
+                }
+                else {
+                    $.post("/event", newEventForChannel, function() {
+                        $("#event-time").val("");
+                    }).done(function(response) {
+                        alert('Новое событие для телеканала «'+ channelName +'» успешно добавлено!');
+                        $(".search-channel-button").trigger("click");    
+                        $("#input-date-field").change();
+                    }).fail(function(jqXHR, textStatus, error) {
+                        alert("Ошибка! Статус: " + jqXHR.status + " – " + jqXHR.textStatus);
+                    });
+                }
+            }
+        });
+    });
+    
+};
+
+//формирование вкладки управления расписанием
+var createScheduleTab = function() {
+    $(".main-tab-body").append($("<div class='main-schedule-panel'><h2>ПАНЕЛЬ УПРАВЛЕНИЯ</h2>" +
+                                "<form class='schedule-form'><input type='date' id='input-date-field' placeholder='Дата'  title='Дата'value=" + dateToString(currentDate) +">" + 
+                                "<button class='search-schedule-button'>Найти</button>" +
+                                "<button class='delete-schedule-button'>Удалить</button>" +
+                                "<button class='cancel-button'>Отмена</button></form></div>"));
+    $(".cancel-button").attr('disabled', true);                      
+    $.get("/schedule/" + $("#input-date-field").val(), function(schedule) {
+        getTVprogramByDate(schedule);
+    });                          
+    $("#input-date-field").change(function() {
+        if ($("#input-date-field").val() != '') {
+            $.get("/schedule/" + $("#input-date-field").val(), function(schedule) {
+                $(".schedule-list").empty();
+                getTVprogramByDate(schedule);
+            });
+        }
+        else {
+            $(".schedule-list").empty();
+        }
+         
+    });
+    $(".cancel-button").on("click", function(e) { 
+        e.preventDefault();
+        $(".cancel-button").attr('disabled', true);
+        $("#input-date-field").attr('disabled', false);
+        $(".search-schedule-button").attr('disabled', false);
+        $(".delete-schedule-button").attr('disabled', false);
+        $(".panel-block").remove();
+    });
+    $(".search-schedule-button").on("click", function(e) { 
+        e.preventDefault();
+        $(".cancel-button").attr('disabled', false);
+        if ( $("#input-date-field").val() == '') {
+            alert("Пожалуйста, выберите дату!")
+        }
+        else {
+            $("#input-date-field").attr('disabled', true);
+            $(".search-schedule-button").attr('disabled', true);
+            $(".delete-schedule-button").attr('disabled', true);
+            $(".panel-block").remove();
+            $(".main-schedule-panel").append($("<div class='panel-block'>"));
+            $(".panel-block").append($("<form class='channel-form'><select name='channel-select' id='channel-select'></form>"));  
+            $.getJSON("/channels.json", function (channels) {
+                channels.forEach(function(channel){
+                    $("#channel-select").append($("<option value=''>").text(channel.channel_name));
+                });
+                $("#channel-select").attr("selected", null);
+                $("#channel-select option:nth-child(1)").attr("selected", "selected");
+                var $channel_selected_option, channelName = $("#channel-select option:selected").text();
+                $("#channel-select").change(function(){
+                    $channel_selected_option = $("#channel-select option:selected");
+                    channelName = $channel_selected_option.text();
+                });
+                $(".channel-form").append($("<button class='search-channel-button'>Найти расписание</button>" +
+                                            "<button class='delete-channel-button'>Удалить расписание</button>" +
+                                            "<button class='cancel-сhannel-button'>Отмена</button></form>"));
+                $(".cancel-сhannel-button").attr('disabled', true);
+                $(".cancel-сhannel-button").on("click", function(e) { 
+                    e.preventDefault();
+                    $(".cancel-сhannel-button").attr('disabled', true);
+                    $(".cancel-button").attr('disabled', false);
+                    $("#channel-select").attr('disabled', false);
+                    $(".search-channel-button").attr('disabled', false);
+                    $(".delete-channel-button").attr('disabled', false);
+                    $(".subpanel-block").remove();
+                });
+                $(".search-channel-button").on("click", function(e) {
+                    e.preventDefault();
+                    $(".subpanel-block").remove();
+                    $(".panel-block").append($("<div class='subpanel-block'>"))
+                    var body = {date: $("#input-date-field").val(), channel_name: channelName};
+                    $.get("/channelByDate", body, function(scheduleOfChannelByDate){
+                        $(".subpanel-block").append($("<div class='event-info-block'><input id='event-time' type='time' placeholder='Время' title='Время' value=''>" +
+                                                        "<select id='event-select' title='Телепередача'></div>"));
+                        $(".subpanel-block").append($("<button class='add-event-button'>Добавить телепередачу</button>"));
+                        if (scheduleOfChannelByDate == null) {
+                            if (confirm("Телеканал «" + channelName + "» не содержит телепрограмму на "+ $("#input-date-field").val() +". Хотите добавить?")) {
+                                addEventToChannel(scheduleOfChannelByDate, channelName);
+                            }
+                            else {
+                                $(".subpanel-block").remove();
+                            }
+                        }
+                        else {
+                            addEventToChannel(scheduleOfChannelByDate, channelName);
+                            $.getJSON("/tv_shows.json", function (tv_shows) {
+                                var i = 0;
+                                var countOfEvents = 0;
+                                (scheduleOfChannelByDate.schedule[0].events).sort(function(a,b){
+                                    return new Date(a.event_time) - new Date(b.event_time);
+                                });
+                                scheduleOfChannelByDate.schedule[0].events.forEach(function(tv_event){
+                                    $(".subpanel-block").append($("<div class='event-block" + i +"' channel_id='" + scheduleOfChannelByDate.schedule[0]._id +"'  event_id='" + tv_event._id +"' num="+ i + ">" + 
+                                                            "<input id='time-of-event" + i + "' type='time' placeholder='Время' title='Время' value=''>" +
+                                                            "<select id='select-of-event" + i + "' title='Телепередача'></div>"));
+                                    $("#time-of-event" + i).val(tv_event.event_time.slice(11,16));
+                                    $("#time-of-event" + i).change(function(){
+                                        $(this).parent().children(".cancel-event-button").attr("disabled", false);
+                                        $(this).parent().children(".delete-event-button").attr("disabled", true);
+                                    });
+                                    tv_shows.forEach(function(tv_show){
+                                        $("#select-of-event" + i).append($("<option value='" + tv_show.tv_show_name + "'>").text(tv_show.tv_show_name));
+                                    });
+                                    $("#select-of-event" + i  + " option[value='" + tv_event.event_name + "']").prop('selected', true);
+                                    $("#select-of-event" + i).change(function(){
+                                        $(this).parent().children(".cancel-event-button").attr("disabled", false);
+                                        $(this).parent().children(".delete-event-button").attr("disabled", true);
+                                    });
+                                    $(".event-block" + i).append($("<button class='delete-event-button'>Удалить</button>" +
+                                                            "<button class='update-event-button'>Редактировать</button>" +
+                                                            "<button class='cancel-event-button'>Отмена</button>"));
+                                    i++;
+                                    countOfEvents++;
+                                });
+                                $(".cancel-event-button").attr('disabled', true);
+                                $(".delete-event-button").on("click", function(e){
+                                    e.preventDefault();
+                                    var $event_block = $(this).parent();
+                                    var eventTime =  $event_block.children("input").val();
+                                    var eventName = $event_block.children("select").children(":selected").val();
+                                    if (confirm("Вы уверены, что хотите удалить событие «" + eventTime + " – " + eventName +  "» телеканала «" + channelName + "»?")) {
+                                        $.ajax({ 
+                                            'url': '/eventOfChannel/' + $("#input-date-field").val(),
+                                            'type': 'DELETE',
+                                            'data': {"channel_id": $event_block.attr("channel_id"), "event_id": $event_block.attr("event_id"), "count_of_events": countOfEvents},
+                                            'success':function (data, status, xhr) {
+                                                alert('Cобытие  «' + eventTime + ' – ' + eventName +  '» телеканала «' + channelName + '» успешно удалено!');
+                                                if (countOfEvents - 1 > 0) 
+                                                    $(".search-channel-button").trigger("click");
+                                                else {
+                                                    $(".cancel-сhannel-button").attr('disabled', true);
+                                                    $(".cancel-button").attr('disabled', false);
+                                                    $("#channel-select").attr('disabled', false);
+                                                    $(".search-channel-button").attr('disabled', false);
+                                                    $(".delete-channel-button").attr('disabled', false);
+                                                    $(".subpanel-block").remove();
+                                                }
+                                                $("#input-date-field").change();
+                                            },
+                                            error: function (jqXHR, exception) {
+                                                alert("Ошибка! Статус: " + jqXHR.status + " – " + jqXHR.textStatus);
+                                            }
+                                        });
+                                    }
+                                    
+                                });
+                                $(".update-event-button").on("click", function(e){
+                                    e.preventDefault();
+                                    var $event_block = $(this).parent();
+                                    var num =  $event_block.attr("num");
+                                    var newEventTime =  $event_block.children("input").val();
+                                    var newEventName = $event_block.children("select").children(":selected").val();
+                                    if (newEventTime == busyTimesDictionary.get(channelName)[num][0] && newEventName == busyTimesDictionary.get(channelName)[num][1]) {
+                                        alert("Данные события не были изменены!");
+                                    }
+                                    else {
+                                        var isInvalidInput = false;
+                                        if (newEventTime != busyTimesDictionary.get(channelName)[num][0]) {                                        
+                                            var events_array = busyTimesDictionary.get(channelName);
+                                            for (var i = 0; i < events_array.length; i++) {
+                                                if (events_array[i].includes(newEventTime)) {
+                                                    alert("На " + newEventTime + " уже есть событие! Попробуйте еще раз!");
+                                                    $("#time-of-event" + num).val(busyTimesDictionary.get(channelName)[num][0]);
+                                                    isInvalidInput = true;
+                                                    break;
+                                            }
+                                        }
+
+                                        }
+                                        if (!isInvalidInput) {
+                                            $.ajax({ 
+                                                'url': '/eventOfChannel/' + $("#input-date-field").val(),
+                                                'type': 'PUT',
+                                                'data': {
+                                                    "channel_id": $event_block.attr("channel_id"), 
+                                                    "event_id": $event_block.attr("event_id"),
+                                                    "event_time": $("#input-date-field").val() + "T" + newEventTime + ":00Z",
+                                                    "event_name": newEventName
+                                                },
+                                                'success':function (data, status, xhr) {
+                                                    alert('Данные события телеканала «' + channelName + '» успешно изменены!');
+                                                    $(".search-channel-button").trigger("click");
+                                                    $("#input-date-field").change();
+                                                },
+                                                error: function (jqXHR, exception) {
+                                                    alert("Ошибка! Статус: " + jqXHR.status + " – " + jqXHR.textStatus);
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                                $(".cancel-event-button").on("click", function(e){
+                                    e.preventDefault();
+                                    $("#input-date-field").change();
+                                    var num =  $(this).parent().attr("num");
+                                    var $event_block = $(this).parent();
+                                    $event_block.children(".cancel-event-button").attr("disabled", true);
+                                    $event_block.children(".delete-event-button").attr("disabled", false);
+                                    $("#time-of-event" + num).val(busyTimesDictionary.get(channelName)[num][0]);
+                                    $("#select-of-event" + num  + " option[value='" + busyTimesDictionary.get(channelName)[num][1] + "']").prop('selected', true);
+                                });
+                            });
+                        }
+                    });
+    
+                });
+                $(".delete-channel-button").on("click", function(e) {
+                    e.preventDefault();
+                    $(".cancel-channel-button").attr('disabled', true);
+                    var date = $("#input-date-field").val();
+                    var body = {date: $("#input-date-field").val(), channel_name: channelName};
+                    $.get("/channelByDate", body, function(schedule){
+                        if(schedule != null) {
+                            if (confirm("Вы уверены, что хотите удалить телепрограмму  телеканала «" + channelName + "» на " + date + "?")) {
+                                $.ajax({ 
+                                    'url': '/scheduleOfChannel/' + date,
+                                    'type': 'DELETE',
+                                    'data': {"channel_name": channelName},
+                                    'success':function (data, status, xhr) {
+                                        alert('Телепрограмма телеканала «' + channelName + '» на '+ date +' успешно удалена!');
+                                        $("#input-date-field").change();
+                                    },
+                                    error: function (jqXHR, exception) {
+                                        alert("Ошибка! Статус: " + jqXHR.status + " – " + jqXHR.textStatus);
+                                    }
+                                });
+                            }
+                        }
+                        else {
+                            alert("Для телеканала «" + channelName + "» на " + date + " отсутствует телепрограмма!");
+                        }
+                    });
+                    
+                });
+            });
+        }
+    });
+    $(".delete-schedule-button").on("click", function(e) {
+        e.preventDefault();
+        if ( $("#input-date-field").val() == '') {
+            alert("Пожалуйста, выберите дату!")
+        }
+        else {
+            var date = $("#input-date-field").val();
+            $.get("/schedule/" + date, function(schedule) {
+                if(schedule.length != 0) {
+                    if (confirm("Вы уверены, что хотите удалить телепрограмму на " + date + "?")) {
+                        $.ajax({
+                            'url': '/schedule/' + date,
+                            'type': 'DELETE',
+                        }).done(function(responde) {
+                            alert('Телепрограмма на '+ date +' успешно удалена!');
+                            $("#input-date-field").change();
+                        }).fail(function(jqXHR, textStatus, error) {
+                            alert("Ошибка! Статус: " + jqXHR.status + " – " + jqXHR.textStatus);	
+                        });
+                    }
+                }
+                else {
+                    alert("Телепрограмма на данную дату отсутствует в системе!");
+                }
+            });
+        }
+    });
+    $(".main-tab-body").append($("<div class='main-schedule-list'>"));
+    $(".main-schedule-list").append($("<h2>Расписание телепередач</h2>"));
+    $(".main-schedule-list").append($("<div class='schedule-list'>"));
+};
 
 //функция обновления данных телеканала
 var updateChannel = function(values_array, input_array) {
@@ -147,13 +561,15 @@ var updateChannel = function(values_array, input_array) {
 
 //функция формирования вкладки для управления телеканалами
 var createChannelsTab = function() {
-    $(".main-tabs-body").append($("<div class='main-channels-panel'><h2>ПАНЕЛЬ УПРАВЛЕНИЯ</h2>"+
+    $(".main-tab-body").append($("<div class='main-channels-panel'><h2>ПАНЕЛЬ УПРАВЛЕНИЯ</h2>"+
                                 "<form class='channel-form'> <input id='input-channel-field' type='text' placeholder='Название телеканала' title='Название телеканала'value=''>" +
                                 "<button class='search-channel-button'>Найти</button>" +
                                 "<button class='delete-channel-button'>Удалить</button>" +
                                 "<button class='cancel-button'>Отмена</button></form></div>"));
+    $(".cancel-button").attr('disabled', true);
     $(".cancel-button").on("click", function(e) {
         e.preventDefault();
+        $(".cancel-button").attr('disabled', true);
         $("#input-channel-field").attr('disabled', false);
         $(".search-channel-button").attr('disabled', false);
         $(".delete-channel-button").attr('disabled', false);
@@ -161,6 +577,7 @@ var createChannelsTab = function() {
     });
     $(".search-channel-button").on("click", function(e) {
         e.preventDefault();
+        $(".cancel-button").attr('disabled', false);
         $(".panel-block").remove();
         var channel_name = $("#input-channel-field").val();
         if (channel_name !== null && channel_name.trim() !== "") {
@@ -247,14 +664,15 @@ var createChannelsTab = function() {
     });
     $(".delete-channel-button").on("click", function(e) {
         e.preventDefault();
+        $(".cancel-button").attr('disabled', false);
         $(".panel-block").remove();
         var channel_name = $("#input-channel-field").val();
         if (channel_name !== null && channel_name.trim() !== "") {
-            $.get("/channel/" + channel_name.trim(), function(channel) {
+            $.get("/channel/" + channel_name.trim().toUpperCase(), function(channel) {
                 if(channel.length != 0) {
                     if (confirm("Вы уверены, что хотите удалить телеканал  «" + channel_name.trim() + "»?")) {
                         $.ajax({
-                            'url': '/channel/' + channel_name.trim(),
+                            'url': '/channel/' + channel_name.trim().toUpperCase(),
                             'type': 'DELETE',
                         }).done(function(responde) {
                             alert('Телеканал успешно удален!');
@@ -262,6 +680,9 @@ var createChannelsTab = function() {
                             alert("Ошибка! Статус: " + jqXHR.status + " – " + jqXHR.textStatus);	
                         });
                         location.reload();
+                    }
+                    else {
+                        $(".cancel-button").attr('disabled', true);
                     }
                 }
                 else {
@@ -273,7 +694,7 @@ var createChannelsTab = function() {
         else
             alert("Название телеканала не задано!");
     });
-    $(".main-tabs-body").append($("<div class='main-channels-list'>"));
+    $(".main-tab-body").append($("<div class='main-channels-list'>"));
     $(".main-channels-list").append($("<h2>Список телеканалов</h2>"));
     $(".main-channels-list").append($("<div class='channels-list'>"));
     $(".channels-list").append($("<ul>"));
@@ -329,13 +750,15 @@ var updateTVShow = function(values_array, input_array) {
 
 //формирование вкладки управления телепередачами
 var createTVShowsTab = function() {
-    $(".main-tabs-body").append($("<div class='main-tv-shows-panel'><h2>ПАНЕЛЬ УПРАВЛЕНИЯ</h2>"+
+    $(".main-tab-body").append($("<div class='main-tv-shows-panel'><h2>ПАНЕЛЬ УПРАВЛЕНИЯ</h2>"+
                                 "<form class='tv-show-form'> <input id='input-show-field' type='text' placeholder='Название телепередачи' title='Название телепередачи'value=''>" +
                                 "<button class='search-tv-show-button'>Найти</button>" +
                                 "<button class='delete-tv-show-button'>Удалить</button>" +
                                 "<button class='cancel-button'>Отмена</button></form></div>"));
+    $(".cancel-button").attr('disabled', true);
     $(".cancel-button").on("click", function(e) {
         e.preventDefault();
+        $(".cancel-button").attr('disabled', true);
         $("#input-show-field").attr('disabled', false);
         $(".search-tv-show-button").attr('disabled', false);
         $(".delete-tv-show-button").attr('disabled', false);
@@ -343,6 +766,7 @@ var createTVShowsTab = function() {
     });
     $(".search-tv-show-button").on("click", function(e) {
         e.preventDefault();
+        $(".cancel-button").attr('disabled', false);
         $(".panel-block").remove();
         var show_name = $("#input-show-field").val();
         if (show_name !== null && show_name.trim() !== "") {
@@ -441,6 +865,7 @@ var createTVShowsTab = function() {
     });
     $(".delete-tv-show-button").on("click", function(e) {
         e.preventDefault();
+        $(".cancel-button").attr('disabled', false);
         $(".panel-block").remove();
         var show_name = $("#input-show-field").val();
         if (show_name !== null && show_name.trim() !== "") {
@@ -457,6 +882,9 @@ var createTVShowsTab = function() {
                         });
                         location.reload();
                     }
+                    else {
+                        $(".cancel-button").attr('disabled', true);
+                    }
                 }
                 else {
                     alert("Данная телепередача отсутствует в системе!");
@@ -467,7 +895,7 @@ var createTVShowsTab = function() {
         else
             alert("Название телепередачи не задано!");
     });
-    $(".main-tabs-body").append($("<div class='main-tv-shows-list'>"));
+    $(".main-tab-body").append($("<div class='main-tv-shows-list'>"));
     $(".main-tv-shows-list").append($("<h2>Список телепередач</h2>"));
     $(".main-tv-shows-list").append($("<div class='tv-shows-list'>"));
     $(".tv-shows-list").append($("<ul>"));
@@ -480,16 +908,16 @@ var createTVShowsTab = function() {
 
 var main = function(){
     "use strict"
-    $(".main-tabs-items a").toArray().forEach(function (element) {
+    $(".main-tab-items a").toArray().forEach(function (element) {
 	    $(element).on("click", function () {
 	        var $element = $(element);
-	        $(".main-tabs-items a span").removeClass("active");
-            $(".main-tabs-items a").removeClass("active");
+	        $(".main-tab-items a span").removeClass("active");
+            $(".main-tab-items a").removeClass("active");
             $element.children().addClass("active"); 
 	        $element.addClass("active");
-	        $(".main-tabs-body").empty();
+	        $(".main-tab-body").empty();
             if ($element.children().parent().is(":nth-child(1)")) { 
-	            console.log("1");
+	            createScheduleTab();
 	        } 
 	        else if ($element.children().parent().is(":nth-child(2)")) { 
 		        createChannelsTab();
@@ -499,6 +927,40 @@ var main = function(){
 	        }
 	        return false;
 	    });
+    });
+    $(document).on('click', "a[href='#channel']", function(e) {
+        $(".popup").append($("<div class='popup-content'>"));
+        e.preventDefault();
+        $('.popup-bg').fadeIn(800);
+        $('html').addClass('no-scroll');
+        $.get("/channel/" + $(this).text(), function(channel) {
+            if (channel.length > 0) {
+                $(".popup-content").append(($("<div class = 'popup-info-text'>").append($("<h2>").text("Название телеканала"))));
+                $(".popup-content").append(($("<div class = 'popup-center-info'>").append($("<h3>").text(channel[0].channel_name))));
+                $(".popup-content").append(($("<div class = 'popup-info-text'>").append($("<h2>").text("Тематика"))));
+                $(".popup-content").append(($("<div class = 'popup-center-info'>").append($("<h3>").text(channel[0].channel_topics))));
+                $(".popup-content").append(($("<div class = 'popup-info-text'>").append($("<h2>").text("Описание"))));            
+                $(".popup-content").append(($("<div class = 'popup-left-info'>").append($("<h3>").text(channel[0].channel_description))));
+            }
+        });
+    });
+    $(document).on('click', "a[href='#tv_show']", function(e) {
+        $(".popup").append($("<div class='popup-content'>"));
+        e.preventDefault();
+        $('.popup-bg').fadeIn(800);
+        $('html').addClass('no-scroll');
+        $.get("/tv_show/" + $(this).text(), function(tv_show) {
+            if (tv_show.length > 0) {
+                $(".popup-content").append(($("<div class = 'popup-info-text'>").append($("<h2>").text("Название телепередачи"))));
+                $(".popup-content").append(($("<div class = 'popup-center-info'>").append($("<h3>").text(tv_show[0].tv_show_name))));
+                $(".popup-content").append(($("<div class = 'popup-info-text'>").append($("<h2>").text("Жанр"))));
+                $(".popup-content").append(($("<div class = 'popup-center-info'>").append($("<h3>").text(tv_show[0].tv_show_genre))));
+                $(".popup-content").append(($("<div class = 'popup-info-text'>").append($("<h2>").text("Описание"))));            
+                $(".popup-content").append(($("<div class = 'popup-left-info'>").append($("<h3>").text(tv_show[0].tv_show_description))));
+                $(".popup-content").append(($("<div class = 'popup-info-text'>").append($("<h2>").text("Возрастное ограничение"))));
+                $(".popup-content").append(($("<div class = 'popup-center-info'>").append($("<h3>").text(tv_show[0].tv_show_age))));
+            }
+        });  
     });
     $('.open-popup').click(function(e) {
         e.preventDefault();
@@ -521,7 +983,7 @@ var main = function(){
         $(".popup-no-content").remove();
         $(".input-field").val("");
     });
-    $(".main-tabs-items a.active").trigger("click");
+    $(".main-tab-items a.active").trigger("click");
 }
 
 $(document).ready(function() {

@@ -1,93 +1,10 @@
-html, body {
-    height: 100%;
-    margin: 5px;
-}
-
-.wrapper {
-    min-height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-header {
-    text-align: center;
-}
-
-header .header-container {
-    background: #FC8B2A;
-    border: solid;
-    padding: 5px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-}
-
-header .header-left {
-    flex-basis: 20%;
-}
-
-header .header-logo img {
-    width: 25%;
-    height: 25%;
-}
-
-header .header-banner h1 {
-    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-    font-size: 150%;
-}
-header .header-middle {
-    padding: 10px;
-    flex-basis: 40%;
-}
-
-header .header-middle .input-box {
-    display: inline-block;
-    margin-left: 10px;
-}
-
-header input[type="text"] {
-    padding: 5px;
-    font-size: 120%;
-    border-color: black;
-    border-radius: 15px;
-}
-
-header .header-middle .input-button {
-    display: inline-block;
-}
-
-header button {
-    padding: 5px;
-    font-size: 120%;
-    border-color: black;
-    border-radius: 10px;
-}
-
-header .header-clock {
-    flex-basis: 30%;
-}
-
-main {
-    margin-top: 5px;
-    margin-bottom: 5px;
-    flex: 1 1 auto;
-}
-
-main .main-content {
-    text-align: center;
-}
-
-main .main-tabs {
-    margin-top: 5px;
-}
-
-main .main-tabs-items {
+main .main-tab-items {
     display: flex;
     padding: 5px 2px 0px 2px;
     justify-content: center;
 }
 
-main .main-tabs-items a {
+main .main-tab-items a {
     flex: 0 1 33.333%;
     border: double;
     border-radius: 2px;
@@ -96,11 +13,11 @@ main .main-tabs-items a {
     color:black
 }
 
-main .main-tabs-items .active {
+main .main-tab-items .active {
     background-color: #008AA4;
 }
 
-main .main-tabs-body {
+main .main-tab-body {
     background: #008AA4;
     border-style: none solid solid solid;
     border-radius: 5px;
@@ -110,11 +27,48 @@ main .main-tabs-body {
     padding: 10px;
 }
 
+.main-schedule-list {
+    text-align: center;
+    padding: 20px 15px 20px 20px;
+    background-color: #119fbc;
+    border: 2px solid;
+    border-radius: 20px;
+    height: 410px;
+    width: 500px;
+}
+
+.main-schedule-list h2{
+    margin-top: 5px;
+    margin-bottom: 15px;
+}
+
+.schedule-list {
+    height: 380px;
+    overflow-x: hidden; 
+    overflow-y: auto;  
+}
+
+.schedule-list::-webkit-scrollbar {
+    display: none;
+}
+
+.main-tabs-no-schedule {
+    display: fles;
+    align-items: center;
+    flex-direction: column;
+    padding-top: 20px;
+}
+
+.main-tabs-no-schedule h2{
+    font-weight: normal;
+    font-size: 140%;
+}
+
 ::-webkit-input-placeholder {
     text-align: center;
 }
 
-.main-tv-shows-panel, .main-channels-panel {
+.main-tv-shows-panel, .main-channels-panel, .main-schedule-panel {
     text-align: center;
     padding: 20px 30px 20px 30px;
     background-color: #FC8B2A;
@@ -125,14 +79,28 @@ main .main-tabs-body {
     align-items: center;
 }
 
-#input-show-field, #input-channel-field {
+#input-show-field, #input-channel-field,  #input-date-field, .subpanel-block select {
     width: 185px;
     font-size: 95%;
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     margin-right: 10px;
 }
 
+.subpanel-block input {
+    width: 85px;
+    font-size: 95%;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    margin-right: 10px;
+    height: 18px;
+}
+
 .search-tv-show-button, .delete-tv-show-button, .cancel-button, .search-channel-button, .delete-channel-button {
+    font-size: 95%;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    margin-right: 10px;
+}
+
+.search-schedule-button, .delete-schedule-button, .cancel-сhannel-button, #channel-select, .delete-event-button, .update-event-button, .cancel-event-button {
     font-size: 95%;
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     margin-right: 10px;
@@ -163,16 +131,27 @@ main .main-tabs-body {
     margin-bottom: 10px;
 }
 
-.panel-block {
+.panel-block, .subpanel-block {
     display: flex;
     flex-direction: column;
     align-items: center;
     margin-top: 10px;
 }
 
+.subpanel-block div {
+    margin-bottom: 10px;
+}
+
 .add-tv-show-button, .update-tv-show-button, .add-channel-button, .update-channel-button {
     font-size: 95%;
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    margin-bottom: 10px;
+}
+
+.add-event-button {
+    font-size: 95%;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    margin-bottom: 20px;
 }
 
 .main-tv-shows-list, .main-channels-list {
@@ -207,42 +186,4 @@ main .main-tabs-body {
 
 .tv-shows-list::-webkit-scrollbar, .channels-list::-webkit-scrollbar {
     display: none;
-}
-
-footer {
-    text-align: center;
-}
-
-footer .footer-container {
-    background: #FC8B2A;
-    border: solid;
-    padding: 5px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-}
-
-footer .footer-image {
-    flex-basis: 30%;
-}
-
-footer .footer-information {
-    flex-basis: 20%;
-}
-
-footer .footer-container h3 {
-    font-size: 130%;
-}
-
-footer .footer-sitemap li{
-    font-size: 110%;
-}
-
-
-footer .footer-sitemap a:visited{
-    color: black;
-}
-
-footer .footer-social-networks {
-    flex-basis: 30%;
 }

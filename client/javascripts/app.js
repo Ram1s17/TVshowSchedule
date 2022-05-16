@@ -39,7 +39,7 @@ var creationOfTabs = function() {
     $(".main-tabs-items span").toArray().forEach(function (span_element) {
         $(span_element).text(days.next().value);
     });
-}
+};
 
 //функция формирования содержания вкладки
 var getTVprogramByDate = function() {
@@ -72,11 +72,15 @@ var getTVprogramByDate = function() {
             $main_channel_box.append($main_channel_name);
             //добавление блока с логотипом и названием канала в основной блок канала
             $main_tabs_cell.append($main_channel_box);
+
+            (channel_object.events).sort(function(a,b){
+                return new Date(a.event_time) - new Date(b.event_time);
+            });
             //цикл по телепрограмме определенного канала
             (channel_object.events).forEach(function(channel_event_object) {
                 //блок с временем и названием передачи
                 $main_event_box_element = $("<div>").addClass("main-event-box-element");
-                //добавление времени пsередачи
+                //добавление времени передачи
                 $main_event_time = $("<div>").addClass("main-event-time");
                 $main_event_time.append($("<time>").text(channel_event_object.event_time.slice(11,16)));
                 $main_event_box_element.append($main_event_time);
@@ -236,7 +240,7 @@ var getPopupContent = function(value) {
             });
         }
     });
-}
+};
 
  var main = function () { 
     "use strict";

@@ -2,7 +2,7 @@ var mongoose = require("mongoose");
 
 var scheduleSchema = mongoose.Schema({
 	date: Date,
-    schedule: [{
+    schedule: [{    
                     channel: String,
                     events: [
                                 {
