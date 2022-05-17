@@ -1,4 +1,5 @@
 var TVShowModel = require("../models/tv_show.js"),
+	ScheduleModel = require("../models/schedule.js"),
     TVShowController = {};
 
 TVShowController.index = function(req, res) {
@@ -64,7 +65,16 @@ TVShowController.update = function(req, res) {
         if (err !== null) {
             res.status(500).json(err);
         } else {
-            res.status(200).json(tv_show);
+            ScheduleModel.updateMany({},
+                                     {$set: {"schedule.$[outer].events.$[inner].event_name": updatedShow.tv_show_name}},
+                                     {"arrayFilters": [{"outer.events": {$ne: []}}, {"inner.event_name": show_name}]},  function (err1, eventInSchedule) {
+                if (err1 !== null) {
+                    res.status(500).json(err1);
+                }
+                else {
+                    res.status(200).json(eventInSchedule);
+                }
+            });
         }
     });
 };
@@ -76,7 +86,30 @@ TVShowController.destroy = function(req, res) {
             res.status(500).json(err);
         } 
         else {
-            res.status(200).json(tv_show);
+            ScheduleModel.updateMany({}, 
+					{$pull: {"schedule.$[outer].events": {"event_name": show_name}}},
+					{"arrayFilters": [{"outer.events": {$ne: []}}]}, function (err, eventInSchedule) {
+				if (err !== null) { 
+					console.log("ERROR" + err);
+					res.status(500).json(err);
+				} else {
+					ScheduleModel.updateMany({}, {$pull: {"schedule": {"events": {$eq: []}}}}, function (err1, channelInSchedule) {
+						if (err1 !== null) {
+							res.status(500).json(err1);
+						} 
+						else {
+							ScheduleModel.deleteMany({"schedule": {$eq: []}}, function (err2, schedule) {
+								if (err2 !== null) {
+									res.status(500).json(err2);
+								} 
+								else {
+									res.status(200).json(schedule);
+								}
+							});
+						}
+					});
+				}
+			});
         }
     });
 };

@@ -391,7 +391,7 @@ var createScheduleTab = function() {
                                                 }
                                                 $("#input-date-field").change();
                                             },
-                                            error: function (jqXHR, exception) {
+                                            'error': function (jqXHR, exception) {
                                                 alert("Ошибка! Статус: " + jqXHR.status + " – " + jqXHR.textStatus);
                                             }
                                         });
@@ -436,7 +436,7 @@ var createScheduleTab = function() {
                                                     $(".search-channel-button").trigger("click");
                                                     $("#input-date-field").change();
                                                 },
-                                                error: function (jqXHR, exception) {
+                                                'error': function (jqXHR, exception) {
                                                     alert("Ошибка! Статус: " + jqXHR.status + " – " + jqXHR.textStatus);
                                                 }
                                             });
@@ -474,7 +474,7 @@ var createScheduleTab = function() {
                                         alert('Телепрограмма телеканала «' + channelName + '» на '+ date +' успешно удалена!');
                                         $("#input-date-field").change();
                                     },
-                                    error: function (jqXHR, exception) {
+                                    'error': function (jqXHR, exception) {
                                         alert("Ошибка! Статус: " + jqXHR.status + " – " + jqXHR.textStatus);
                                     }
                                 });
