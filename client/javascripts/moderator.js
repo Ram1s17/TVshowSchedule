@@ -1,7 +1,5 @@
 //текущая дата
 var currentDate = new Date;
-//словать вида: "День недели, число": "ГГГГ-ММ-ДД" 
-var datesDictionary = new Map();
 //словарь вида: "Канал": [["Время": "Событие"]]
 var busyTimesDictionary = new Map();
 
@@ -13,24 +11,6 @@ var dateToString = function(date) {
         (mm>9 ? '' : '0') + mm,
         (dd>9 ? '' : '0') + dd
        ].join('-');
-};
-
-//функция формирования вкладок
-var creationOfTabs = function() {
-    var daysOfWeek = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
-    var yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    var textYesterdayDate = dateToString(yesterday);
-    datesDictionary.set(daysOfWeek[yesterday.getDay()] + ", " + yesterday.getDate(), textYesterdayDate);
-    var textCurrentDate = dateToString(currentDate);
-    datesDictionary.set(daysOfWeek[currentDate.getDay()] + ", " + currentDate.getDate(), textCurrentDate);
-    var date = new Date();
-    var textDate;
-    for (var i = 0; i < 7; i ++) {
-        date.setDate(date.getDate() + 1);
-        textDate = dateToString(date);
-        datesDictionary.set(daysOfWeek[date.getDay()] + ", " + date.getDate(), textDate);
-    }
 };
 
 //функция получения расписания на опредленную дату
